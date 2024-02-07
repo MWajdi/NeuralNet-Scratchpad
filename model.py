@@ -30,7 +30,7 @@ def activation_function(function):
 
 class Layer:
     def __init__(self, input_size, output_size, a_function):
-        self.W = np.random.randn(output_size, input_size)
+        self.W = np.random.randn(output_size, input_size) * np.sqrt(2. / input_size)
         self.B = np.zeros(shape=(output_size, 1), dtype=float)
         self.g, self.d_g = activation_function(a_function)
         self.A, self.Z = None, None
@@ -46,6 +46,11 @@ class NN:
         self.layers = layers
         self.lr = lr
 
+    def loss(self, X, Y):
+        A = self.forward(X)
+        loss = -np.mean(np.sum(Y * np.log(A + 1e-9), axis=0)) 
+        return loss
+    
     def forward(self,X):
         A = X
         for layer in self.layers:
@@ -67,8 +72,6 @@ class NN:
 
             if i > 0:
                 dZ = np.matmul(self.layers[i].W.T, dZ) * self.layers[i-1].d_g(self.layers[i-1].Z)
-
-    
             
             self.layers[i].W -= self.lr * dW
             self.layers[i].B -= self.lr * dB
